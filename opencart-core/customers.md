@@ -114,6 +114,19 @@ Registration (`account/register`):
    customer stays `status = 0`.
 4. The `addCustomer/after` event fires `mail/register` (welcome) and `mail/register/alert` (admin). `[verified]` (event rows)
 
+Registration group resolution `[baseline]`:
+1. The final `customer` insert happens in `catalog/model/account/customer.php::addCustomer($data)`.
+2. But the effective `customer_group_id` for a new storefront customer is not owned by the model alone.
+3. In the stock baseline, `catalog/controller/account/register.php` and `catalog/controller/checkout/register.php`
+   both resolve `customer_group_id` before the model call, and both reuse that group for group-scoped
+   custom-field validation.
+4. In the same baseline, `ModelAccountCustomer::addCustomer()` independently resolves its own fallback
+   `customer_group_id` before writing the row and before checking the target group's `approval` flag.
+5. Practical implication: a custom rule like "all new customers must enter group X" is a multi-layer change.
+   Patching only `catalog/model/account/customer.php` is not sufficient; verify the full registration chain:
+   `catalog/controller/account/register.php`, `catalog/controller/checkout/register.php`, and
+   `catalog/model/account/customer.php`.
+
 Login (`account/login`): `Cart\Customer::login()` verifies the hash (or legacy md5) and stores
 `customer_id` in the session; `__construct` re-hydrates on each request and enforces `status = 1`.
 
@@ -187,6 +200,10 @@ Admin:
 - `catalog/model/account/customer.php::addCustomer` — registration write (custom fields, extra
   columns, hashing). Prefer the `addCustomer/before|after` event.
 - `catalog/controller/account/register.php` / `edit.php` — validation and custom-field handling.
+- New-customer group customization is a multi-layer hotspot: do not patch only
+  `catalog/model/account/customer.php::addCustomer` and assume the behavior is complete. The stock
+  `account/register` and `checkout/register` controllers also prepare and validate `customer_group_id`
+  before the model write.
 - `system/library/cart/customer.php::login` — auth (social-login / SSO modules hook here).
 - `admin/model/customer/customer_approval.php` — approval side effects.
 - Storefront `account/*.twig` — form markup.
@@ -217,6 +234,10 @@ Verified against LiveStore `v3.0.4.4` on 2026-07-04. Confidence split by how eac
   approval `oc_event` rows (lines ~1218–1250).
 
 ### `[baseline]` — confirmed by targeted grep, not full read
+- `catalog/controller/account/register.php` and `catalog/controller/checkout/register.php`
+  `customer_group_id` handling was confirmed by targeted grep: both stock controllers resolve a
+  group before the model call and reuse it for custom-field validation; `catalog/model/account/customer.php::addCustomer()`
+  separately resolves its own fallback `customer_group_id` before insert / approval handling.
 - `public function` lists for `admin/controller/customer/customer.php`,
   `admin/model/customer/customer.php`, and `catalog/model/account/address.php`.
 
