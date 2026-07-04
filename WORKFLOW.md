@@ -209,6 +209,24 @@ Before implementation in a real project, always re-check:
 - module-specific route/controller replacements
 - baseline drift from the current LiveStore tag
 
+## OpenCart Hard Mode
+
+Use this repository under a strict no-guessing rule.
+
+- Do not guess routes, methods, models, Twig variables, XML anchors, database tables, columns, events, or config keys.
+- Read the real target files before treating a technical point as confirmed.
+- Check the full affected chain: route, controller, model, language, view, OCMOD or install XML, events, and theme override.
+- Treat OCMOD as fragile and verify exact single-line search anchors against the real source before editing.
+- If a point is not verified against source, baseline, schema, or existence check, keep it unverified rather than inventing it.
+- Before implementation, check collision zones: OCMOD, theme overrides, events, and third-party extensions.
+- Before completion, verify that the final logic is not duplicated, overridden, or injected elsewhere.
+- In OpenCart work, plausibility is not correctness.
+
+Rule of interpretation:
+- this knowledge base is a verified acceleration layer
+- it is not a license to skip project-specific verification
+- confidence tags remain part of the fact itself, not optional decoration
+
 ## Update Policy
 
 Update a pack when:

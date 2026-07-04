@@ -18,6 +18,8 @@ These packs document verified or explicitly-scoped baseline behavior for the cur
 
 The repository workflow, confidence taxonomy, re-baselining rules, and core-vs-overlay policy are defined in [`WORKFLOW.md`](./WORKFLOW.md).
 
+OpenCart Hard Mode also applies: this repository is an acceleration layer, not permission to guess missing routes, methods, columns, anchors, or override behavior.
+
 ## Baseline
 
 Current documented baseline:
