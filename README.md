@@ -59,7 +59,7 @@ templates/
 Core notes should be built from a verified upstream baseline such as:
 
 - OpenCart core
-- LiveStore `3.0.4.3` when that is the active working baseline
+- the latest available LiveStore release when LiveStore is the active working baseline
 
 Theme and module notes should be added only when a real task touches them.
 
