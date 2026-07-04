@@ -43,6 +43,24 @@ templates/
 - Every note should prefer exact paths, routes, method names, table names, and conflict hotspots.
 - Baseline notes should record the source version they were checked against.
 
+## How AI Assistants Should Use This Repository
+
+This repository is meant to be used by Codex, Claude Code, OpenCode, Cursor, Gemini CLI, and other LLM-based coding assistants as a reusable OpenCart knowledge layer.
+
+Recommended workflow:
+
+1. Identify the active OpenCart domain first.
+   - Example: orders, mail, products, customers, API, checkout
+2. Check whether a relevant note already exists here.
+3. Use that note as the starting map for the task.
+4. Verify the real current project before making code, XML, SQL, Twig, or schema claims.
+5. If the task reveals a verified gap, update the relevant note instead of leaving the discovery implicit.
+
+Important rule:
+
+- This repository accelerates investigation.
+- It does **not** replace targeted verification against the current project.
+
 ## Suggested Growth Order
 
 1. Orders
