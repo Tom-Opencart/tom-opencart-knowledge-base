@@ -207,6 +207,17 @@ Admin:
 - `system/library/cart/customer.php::login` — auth (social-login / SSO modules hook here).
 - `admin/model/customer/customer_approval.php` — approval side effects.
 - Storefront `account/*.twig` — form markup.
+- Customer-list bulk group change is a native admin-chain hotspot, not just a Twig insertion:
+  `admin/controller/customer/customer.php` + `admin/model/customer/customer.php` +
+  `admin/language/*/customer/customer.php` + `admin/view/template/customer/customer_list.twig`.
+  A list-only Twig patch is insufficient if the action needs new JSON handling, messages, or
+  data mutation. `[baseline]`
+- If a module changes `customer.customer_group_id` directly in SQL during storefront execution,
+  the logged-in `Cart\Customer` object is not automatically refreshed inside the same request.
+  If the current session's customer was moved, re-hydrate the session explicitly (for example by
+  calling `Cart\Customer::login(..., $override = true)`) before expecting `getGroupId()` and
+  group-scoped pricing to reflect the new value. `[verified]` for `Cart\Customer::login` override
+  support / `[baseline]` for practical module-side use.
 
 ## Theme Override Risks
 
@@ -220,6 +231,13 @@ Admin:
 - B2B / customer-group modules (touch `customer_group`, `approval`, custom pricing).
 - Approval/verification add-ons (SMS/email confirm) interacting with `customer_approval` + `status`.
 - Loyalty / reward / wallet modules (`customer_reward`, `customer_transaction`).
+- Customer-group transition / B2B pricing / VIP modules that:
+  - update `customer.customer_group_id` directly
+  - read the current group from `Cart\Customer`
+  - inject bulk-change UI into `customer/customer_list.twig`
+  - rely on `catalog/model/checkout/order/addOrderHistory/after` for runtime transitions
+  These modules commonly collide at the customer list, session refresh boundary, and group-scoped
+  pricing/discount logic. `[baseline]`
 
 ## Verification Notes
 
