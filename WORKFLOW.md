@@ -222,6 +222,48 @@ Do not update a pack when:
 - the statement is still inference without source support
 - the evidence level is unclear
 
+## Self-Correction and Gap-Fill
+
+The knowledge base is expected to improve during real work. Two obligations apply.
+
+### Fix errors immediately
+
+If, while verifying against a real source (LiveStore baseline, local project files, live DB), you
+find a pack claim that is wrong, outdated, or misleading, fix it in the same session.
+
+Qualifying errors:
+- method signature does not match the real source
+- table/column name wrong or missing
+- event mapping incorrect or incomplete
+- confidence tag too high for the actual evidence
+- a LiveStore build extra documented as vanilla OpenCart, or vice versa
+- a path that does not exist at the referenced baseline
+
+Fix protocol:
+1. Confirm the correct fact against the real source first — never replace one guess with another.
+2. Edit the pack.
+3. Adjust the confidence tag to reflect the new verification depth.
+4. If the fix is significant (wrong signature, wrong schema, missing critical event), state it in
+   the commit message / task output so the user is aware.
+
+### Fill gaps on discovery
+
+If during a task you had to read something the pack should already have documented (a commonly
+needed method, a schema detail, an event mapping, a config default, a controller→model→view chain,
+an OCMOD hotspot, a collision zone), add it back.
+
+Fill protocol:
+1. Finish the current task first — do not context-switch mid-implementation.
+2. Add the missing fact with the correct confidence tag (prefer `[verified]` when read from source
+   during the task).
+3. Commit the update so future sessions benefit.
+
+### Guardrail
+
+Self-correction must never lower accuracy. Any edit to the base must be backed by a source read,
+grep, or existence check — the same evidence bar as the original claim. Do not "correct" a pack
+from memory or from unverified inference.
+
 ## Commit Policy
 
 Recommended commit boundaries:
