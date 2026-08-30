@@ -310,3 +310,10 @@ Good first overlay candidates:
 Use this knowledge base to get oriented faster.
 Do not use it as permission to skip source verification in the real target project.
 Confidence tags are part of the data, not decoration.
+
+## Mandatory Engineering & Self-Review Loop (Автономный цикл разработки и ревью)
+
+При создании или модификации решений OpenCart:
+1. **Grounded Verification & Native Modules Alignment:** Никаких фантазий и предположений — обязательная сверка архитектуры, данных, методов и таблиц с аналогичными штатными модулями/расширениями из поставки той же версии OpenCart и апстрима `LiveStore v3.0.4.4`.
+2. **Lifecycle & Migrations:** Поддержка `install`, `upgradeSchema` (`ALTER TABLE`), `migration_map` для предотвращения коллизий ID, идемпотентность.
+3. **Autonomous Self-Review:** Обязательный запуск мини-код-ревью (P0/P1/P2) с реальным исполнением тестов. Если найдены ошибки — цикл исправлений и повторных проверок продолжается до достижения 0 дефектов перед финальным отчётом.
