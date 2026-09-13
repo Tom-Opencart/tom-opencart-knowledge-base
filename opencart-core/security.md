@@ -90,7 +90,7 @@ behaviour documented in `opencart-core/request-response.md`; read that pack befo
 - :19-31 the second ignore list is `common/login`, `common/logout`, `common/forgotten`, `common/reset`,
   `error/not_found`, `error/permission`.
 - :29 the check:
-  `if (!in_array($route, $ignore) && (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || ($this->request->get['user_token'] != $this->session->data['user_token'])))`
+  `if (!in_array($route, $ignore) && (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || ($this->request->get['user_token'] != $this->session->data['user_token']))) {`
   → redirect to `common/login`.
 - :33-35 when no `route` is present at all, the token is still required.
 
