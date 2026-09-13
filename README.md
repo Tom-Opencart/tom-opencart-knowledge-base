@@ -11,6 +11,10 @@ Core domain packs in `opencart-core/`:
 - `products.md`
 - `customers.md`
 - `api.md`
+- `cache.md`
+- `events.md`
+- `request-response.md`
+- `permissions.md`
 
 These packs document verified or explicitly-scoped baseline behavior for the current upstream reference build.
 

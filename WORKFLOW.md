@@ -23,6 +23,11 @@ What this repository is NOT:
   - `products.md`
   - `customers.md`
   - `api.md`
+  - `cache.md`
+  - `events.md`
+  - `request-response.md`
+  - `permissions.md` — admin ACL: route → permission key resolution, the `access` / `modify` split,
+    the core extension install/uninstall flow, escalation patterns, and the write-path audit recipe
 
 ### Overlays
 
