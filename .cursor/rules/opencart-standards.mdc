@@ -1,0 +1,30 @@
+---
+description: OpenCart 3.x standards and verified core behavior
+globs: ["**/*.php", "**/*.twig", "**/install.xml", "**/*.ocmod.zip"]
+alwaysApply: true
+---
+
+# OpenCart standards
+
+The authoritative entry point is `AGENTS.md` at the repository root — read it, plus the relevant pack in
+`opencart-core/`, before writing or reviewing OpenCart code.
+
+This file exists only so Cursor picks the standards up automatically.
+
+Condensed rules:
+
+- Admin authorization is two-tier. The route permission key is `parts[0]/parts[1]` (plus `parts[2]` for
+  the `extension/*` list), so the method name is never part of the key, and the router enforces only
+  `access`. Every write path must check `modify` itself, and the check must dominate the write.
+- `install()` / `uninstall()` must check `modify` on `extension/extension/module` (or
+  `extension/extension/theme`) — a direct route call bypasses core's own check.
+- Schema changes run from `install()`/`uninstall()`, never from `index()`/`form()` or any read path.
+- `CREATE TABLE IF NOT EXISTS` does not add columns to an existing table; guard `ALTER` inside `install()`.
+- Never change `<code>` in `install.xml` — the row is keyed by `code`, so a change duplicates the
+  modification instead of replacing it.
+- Theme `include`/`extends` use the full template path with an explicit `.twig` extension.
+- Every raw query uses `DB_PREFIX` and `$this->db->escape()`; numeric ids are cast with `(int)`.
+- Static gates prove syntax and structure, never behavior; a gate that has never failed has not been
+  shown to work.
+- Tag factual claims `[verified]`, `[baseline]`, `[exists]` or `[needs-verification]`, and verify against
+  the real project before relying on anything here.

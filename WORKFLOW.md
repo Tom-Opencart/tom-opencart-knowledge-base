@@ -17,7 +17,21 @@ What this repository is NOT:
 ### Core Packs
 
 - `opencart-core/` — stable domain packs for core OpenCart behavior.
-- Current packs:
+- Current STANDARDS packs (rules for writing correct OpenCart code):
+  - `coding-standards.md` — formatting, naming, file layout, official style rules
+  - `mvc-l-architecture.md` — controllers/models/views/language, loaders, registry, routing internals
+  - `permissions.md` — admin ACL: route → permission key resolution, the `access` / `modify` split,
+    the core extension install/uninstall flow, escalation patterns, and the write-path audit recipe
+  - `security.md` — SQL escaping, XSS, CSRF/`user_token`, sessions, hashing, uploads
+  - `database-schema.md` — `DB_PREFIX`, schema ownership, idempotency, core table map
+  - `settings-and-config.md` — the `setting` table, store scoping, key conventions, inert settings
+  - `extension-development.md` — extension types, file layout, install/uninstall contract
+  - `ocmod.md` — `install.xml`, search/add, position/offset, the modification cache, the `code` landmine
+  - `release-and-packaging.md` — `.ocmod.zip` layout, installer mechanics, update-vs-reinstall strategy
+  - `twig-theming.md` — Twig config, template paths, theme structure, asset registration
+  - `seo-and-routing.md` — route resolution, `seo_url`, link generation, URL hygiene
+  - `testing-and-verification.md` — static gates, structural audits, positive-testing a gate, evidence discipline
+- Current DOMAIN MAPS (how core behaves):
   - `orders.md`
   - `mail.md`
   - `products.md`
@@ -26,8 +40,6 @@ What this repository is NOT:
   - `cache.md`
   - `events.md`
   - `request-response.md`
-  - `permissions.md` — admin ACL: route → permission key resolution, the `access` / `modify` split,
-    the core extension install/uninstall flow, escalation patterns, and the write-path audit recipe
 
 ### Overlays
 
@@ -100,7 +112,12 @@ Default upstream baseline:
 - always use the latest release tag unless a pack explicitly documents another baseline
 
 Current baseline used by the core packs:
-- `v3.0.4.4`
+- `v3.0.4.4` for the domain maps written before 2026-09-13 (`orders.md`, `mail.md`, `products.md`,
+  `customers.md`, `api.md`, `cache.md`, `events.md`, `request-response.md`)
+- `v3.0.4.5` for the standards packs authored on 2026-09-13 (`coding-standards.md`,
+  `mvc-l-architecture.md`, `permissions.md`, `security.md`, `database-schema.md`,
+  `settings-and-config.md`, `extension-development.md`, `ocmod.md`, `release-and-packaging.md`,
+  `twig-theming.md`, `seo-and-routing.md`, `testing-and-verification.md`)
 
 Raw source convention:
 - `https://raw.githubusercontent.com/19th19th/LiveStore/{tag}/upload/{path}`
@@ -109,6 +126,36 @@ Important rule — every pack must state:
 - `Version`
 - `Source`
 - `Verified on`
+
+## Baseline Drift Log
+
+### `v3.0.4.4` → `v3.0.4.5`
+
+Measured on 2026-09-13 via the GitHub compare API: **39 commits, 49 changed files.**
+
+Re-checked and found **byte-identical** between the two tags, so claims about them hold on either:
+- `upload/admin/controller/startup/permission.php`
+- `upload/admin/controller/extension/extension/module.php`
+- `upload/admin/controller/extension/extension/theme.php`
+
+Notable changes that touch existing pack domains (these claims were verified on `v3.0.4.4` and have NOT
+been re-verified against `v3.0.4.5` — treat the affected statements as `[needs-verification]` until then):
+- `upload/admin/controller/setting/setting.php`, `admin/view/template/setting/setting.twig` — settings domain
+- `upload/admin/controller/common/filemanager.php` — security / upload domain
+- `upload/admin/view/template/user/user_group_form.twig` — permission UI (the ACL mechanism itself is unchanged)
+- `upload/admin/controller/catalog/product.php`, `admin/model/catalog/product.php`,
+  `catalog/controller/product/product.php`, `catalog/model/catalog/product.php`,
+  `catalog/controller/product/manufacturer.php` — products domain
+- `upload/catalog/controller/account/login.php`, `catalog/controller/checkout/login.php` — customers domain
+- `upload/catalog/view/theme/default/stylesheet/stylesheet.css` — theme assets
+
+Removed in `v3.0.4.5` (a real example of the installer's no-delete asymmetry):
+- `upload/catalog/language/en-gb/extension/module/google_hangouts.php`
+- `upload/catalog/language/ru-ru/extension/module/google_hangouts.php`
+- `upload/catalog/view/theme/default/template/extension/module/google_hangouts.twig`
+
+A pack written against `v3.0.4.4` whose cited files are in the list above must be re-checked and its
+`Version` updated before its claims are relied on.
 
 ## Re-Baselining Procedure
 

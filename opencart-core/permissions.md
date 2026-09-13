@@ -144,7 +144,9 @@ the router does not gate and the controller does not gate either.
    dominate it (e.g. inside an `if` that the write is not nested in).
 7. **Install/uninstall without a guard.** See the direct-call consequence above.
 
-## Audit recipe (enforceable)
+## ENFORCEABLE CHECKS
+
+(Requirement, structural check, and the audit recipe that decides them.)
 
 - **Requirement.** Every admin controller method that performs a write must be protected by a
   dominating `hasPermission('modify', <route>)`, where `<route>` is the controller's own route or the
