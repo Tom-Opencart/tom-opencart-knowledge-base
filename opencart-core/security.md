@@ -50,7 +50,7 @@ displayed in production.
 ```
 'autoescape'  => false,
 'debug'       => false,
-'autoreload'  => true,
+'auto_reload' => true,
 'cache'       => DIR_CACHE . 'template/'
 ```
 
