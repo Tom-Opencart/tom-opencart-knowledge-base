@@ -90,7 +90,8 @@ a store without one is silently a normal link — not an error.
 - :17-18 **`if ($this->config->get('config_seo_url')) { $this->url->addRewrite($this); }`** — the controller
   registers **itself** as a `Url` rewrite. SEO URLs are therefore a URL-builder concern, not a router
   concern.
-- :37 keyword lookup: `SELECT * FROM …seo_url WHERE keyword = '<keyword>'`
+- :37 inbound SEO lookup filters by `keyword` and `store_id`. :116 and :127 outbound lookups filter by `query`,
+  `store_id` and `language_id`. Check keyword collisions between different queries across all languages of the same store.
 - :40 `$url = explode('=', $query->row['query']);` — the stored `query` value has the form `product_id=42`
 - :62-63 if a query exists and its leading key is not one of the special-cased ids (information_id,
   manufacturer_id, …), then `$this->request->get['route'] = $query->row['query']`
@@ -155,8 +156,11 @@ quietly unless the error page is inspected.
 - `catalog/controller/startup/seo_url.php` was inspected by **targeted line read** (the lines cited above),
   **not** read in full — the surrounding logic of `index()`/`rewrite()` is `[baseline]`. The `seo_pro`
   component's own file was not read at all — `[needs-verification]`.
-- The `seo_url` **table definition** was not read from `install/opencart.sql`; the column names `keyword`
-  and `query` are `[verified]` from the controller's SQL, not from the schema.
+- The [installer schema](https://github.com/19th19th/LiveStore/blob/v3.0.4.5/upload/install/opencart.sql) defines
+  seo_url_id, store_id, language_id, query and keyword. Both query and keyword are VARCHAR(255).
+  The composite indexes on (query, store_id, language_id) and (keyword, store_id, language_id)
+  are non-unique. The installer uses MyISAM and utf8_general_ci. Schema and store/language lookup
+  scopes were verified on 2026-11-11 against the v3.0.4.5 sources.
 - The special-cased id list at :62 was seen partially (information_id, manufacturer_id); the complete list
   is `[needs-verification]`.
 - `.htaccess` / web-server rewrite rules and the store's `config_seo_url` value were **not** inspected.
