@@ -129,7 +129,9 @@ Line numbers are for that file at `v3.0.4.4`:
 
 ### LiveStore build extras (present in this baseline, NOT vanilla OpenCart core) `[verified]`
 
-- `product.noindex` tinyint(1) DEFAULT '1' (line 2471).
+- `product.noindex` tinyint(1) DEFAULT '1' (line 2471). Meaning `[verified]`: `noindex <= 0` with
+  `config_noindex_status` on makes `product/product` set `noindex,follow` (`catalog/controller/product/product.php:226`);
+  the same column and rule exist on `category`, `manufacturer` and `information` (see `seo-and-routing.md` section 6).
 - `product_description.meta_h1` varchar(255) (line 2614).
 - `product_to_category.main_category` tinyint(1) DEFAULT '0' (line 2942).
 - `product_related_article` (line 4797), `product_related_wb` (line 4935),

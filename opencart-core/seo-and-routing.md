@@ -138,6 +138,43 @@ quietly unless the error page is inspected.
 - Treat `seo_url` table rows as load-bearing data; a keyword edit changes live URLs.
 - Remember `startup/seo_url` is catalog-only; do not expect admin routes to be rewritten.
 
+## 6. SeoPro, language URLs and sitemap integration (`[verified]`, LiveStore `v3.0.4.5`)
+
+Read in full or by cited line during the Fast Sitemap work (2026-11-21).
+
+- **SeoPro is constructed by the `seo_url` pre-action** (`catalog/controller/startup/seo_url.php:9-11`) and is
+  active only when `config_seo_pro` is on (`system/library/seopro.php`, 726 lines).
+- **`SeoPro::validate()`** (`seopro.php:475`) canonicalises the request by comparing it with `Url::link()` and
+  301-redirecting. Routes in its `$break_routes` array (`seopro.php:481-489`) skip that step:
+  `error/not_found`, `extension/feed/google_sitemap`, `extension/feed/google_base`,
+  `extension/feed/sitemap_pro`, `extension/feed/yandex_feed`. **OCMOD hotspot:** the line
+  `\t\t\t\t'extension/feed/google_sitemap',` (four tabs) occurs exactly once, at `seopro.php:483`, and is the
+  anchor for adding a custom feed route to the exemption.
+- **A page URL in another language exists only through that language's `seo_url` keyword.**
+  `Url::link()` → `seo_url::rewrite()` → `SeoPro::baseRewrite()` read `config_language_id` at call time
+  (`seopro.php:141`, `getKeywordByQuery()` uses `config_language_id`). A link with no keyword for the current
+  language comes back un-rewritten (`index.php?route=...`), which carries no language at all.
+- **`lang_code` is not a core parameter.** It occurs 0 times in LiveStore `v3.0.4.5` (`*.php`, `*.twig`,
+  `.htaccess`). Never put it in a page URL; only a module's own feed endpoints may define it.
+- **Language selection at startup** (`catalog/controller/startup/startup.php:61-129`): session → cookie →
+  `Accept-Language` → `config_language`, then `config_language_id` is set at line 129. Code that must be
+  deterministic regardless of the visitor (feeds, cron-rendered output) has to set `config_language_id` itself.
+- **`Url::link($route, $args, $secure)`** uses `$this->ssl` only when `$secure` is true (`system/library/url.php:49`).
+  Without `$secure` an https site whose `config_url` is `http://` yields `http://` links.
+- **Languages:** `catalog/model/localisation/language.php::getLanguages()` returns only `status = 1`, keyed by
+  language `code`, cached as `catalog.language`. The admin model's no-argument `getLanguages()` has the same shape
+  and also filters `status = 1` on every route except `localisation/language`
+  (`admin/model/localisation/language.php:294-306`).
+- **Stock `.htaccess`** (`upload/.htaccess`): line 25 `RewriteCond %{QUERY_STRING} ^(.*)&?page=1$` with line 26
+  (301 that strips `page=1`), line 27 `RewriteRule ^sitemap.xml$ index.php?route=extension/feed/google_sitemap [L]`,
+  line 28 `googlebase.xml`, then the front-controller rule from line 30. A feed must not emit `page=1`, and a rule
+  block placed before line 27 wins over the stock `sitemap.xml` rule.
+- **Page-level `noindex`** is a LiveStore column on `category`, `product`, `manufacturer`, `information`
+  (and the blog tables), default `1`. Storefront controllers call `setRobots('noindex,follow')` when
+  `noindex <= 0 && config_noindex_status` (`product/product.php:226`, `product/category.php:118`,
+  `product/manufacturer.php:136`, `information/information.php:34`); `config_noindex_status` defaults to `1`
+  (`install/opencart.sql:3406`). A sitemap must therefore skip rows with `noindex <= 0` while that setting is on.
+
 ## ENFORCEABLE CHECKS
 
 1. No hardcoded `index.php?route=` in new templates/controllers — links go through `Url::link()`.
@@ -147,19 +184,22 @@ quietly unless the error page is inspected.
 4. A custom rewrite parses the query string safely (`str_replace` + `parse_str`, not raw `&` assumptions).
 5. SEO-dependent code handles both the rewritten and the plain-`index.php` form.
 6. No duplicate array key in a config's `action_event` (see `twig-theming.md`).
+7. Feed/sitemap code: pass `$secure` to `Url::link()`, set `config_language_id` explicitly, skip rows with
+   `noindex <= 0` while `config_noindex_status` is on, and never invent a page-URL language parameter (section 6).
 
 ## Verification Notes
 
 - Read directly and in full: `system/library/url.php` (69 lines). Read in full:
   `system/config/catalog.php` (62 lines), `system/config/admin.php` (49 lines).
 - `catalog/controller/startup/seo_url.php` was inspected by **targeted line read** (the lines cited above),
-  **not** read in full — the surrounding logic of `index()`/`rewrite()` is `[baseline]`. The `seo_pro`
-  component's own file was not read at all — `[needs-verification]`.
+  **not** read in full — the surrounding logic of `index()`/`rewrite()` is `[baseline]`. `system/library/seopro.php`
+  was read for `validate()`, `detectLanguage()`, `baseRewrite()` and the helpers cited in section 6; the remaining
+  methods are `[baseline]`.
 - The `seo_url` **table definition** was not read from `install/opencart.sql`; the column names `keyword`
   and `query` are `[verified]` from the controller's SQL, not from the schema.
 - The special-cased id list at :62 was seen partially (information_id, manufacturer_id); the complete list
   is `[needs-verification]`.
-- `.htaccess` / web-server rewrite rules and the store's `config_seo_url` value were **not** inspected.
-  Whether pretty URLs work at all depends on server configuration this pack does not cover.
+- The stock `.htaccess` rules are documented in section 6 `[verified]`. The store's `config_seo_url` value and any
+  server configuration remain outside this pack, so whether pretty URLs work on a given site is not covered.
 - Not verified: canonical/hreflang handling, sitemap generation, and any LiveStore-specific SEO module
   beyond `seo_url` and `seo_pro`.
