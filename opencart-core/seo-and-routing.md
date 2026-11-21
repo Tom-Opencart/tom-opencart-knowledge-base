@@ -174,6 +174,29 @@ Read in full or by cited line during the Fast Sitemap work (2026-11-21).
   `noindex <= 0 && config_noindex_status` (`product/product.php:226`, `product/category.php:118`,
   `product/manufacturer.php:136`, `information/information.php:34`); `config_noindex_status` defaults to `1`
   (`install/opencart.sql:3406`). A sitemap must therefore skip rows with `noindex <= 0` while that setting is on.
+- **A short URL for a non-entity route is just a `seo_url` row** (`query` = route, `keyword` = the path
+  segment) `[verified]`. Chain: stock `.htaccess` front controller (line 32 only excludes
+  `ico|gif|jpg|jpeg|png|js|css`, so `.xml` passes) → `index.php?_route_=<keyword>` →
+  `seo_url::index()` looks the keyword up by `keyword` + `store_id`, with no language filter
+  (`catalog/controller/startup/seo_url.php:37`) and copies `query` into `route` for every query that is not
+  product/category/manufacturer/information (`:63`). `SeoPro::prepareRoute()` returns the parts unchanged for
+  such queries (`seopro.php:66-67`). On LiveStore, `information/contact` is stored as `contact-us` and
+  `common/home` with an empty keyword. A keyword is one path segment: the decode loop splits `_route_` on `/`.
+- **The language of a request can come from the keyword.** `SeoPro::detectLanguage()` (`seopro.php:543`)
+  looks the keyword up in `seo_url` without a language filter and switches `config_language_id` to the
+  language of that row. Give every language its own keyword for the same route.
+- **Admin SEO URL form rules** (`admin/controller/design/seo_url.php:511-535`): `query` and `keyword` must be
+  non-empty and the keyword must not be used by a *different* query in the same store. There is no
+  character filter, so a keyword such as `fast_sitemap.xml` is accepted. `seo_url` has indexes
+  `query`, `keyword`, `query_store_language`, `keyword_store_language` and no unique key.
+- **Writing `seo_url` outside the core admin model:** the core product model clears the SEO PRO keyword cache
+  with `$this->cache->delete('seopro')` when `config_seo_pro` is on (`admin/model/catalog/product.php:156-158`);
+  the file adaptor globs `cache.seopro.*` (`system/library/cache/file.php:84-88`). `admin/model/design/seo_url.php`
+  does not clear it, so rows written by a module must do it themselves or a stale `config_seo_url_cache`
+  hides them.
+- **`/sitemap.xml` is not available to SEO URL on a stock install:** `.htaccess` line 27 maps it to
+  `google_sitemap` before PHP runs. Any other file name works through `seo_url` on Apache and on any server
+  whose front-controller rewrite already makes SEO URLs work.
 
 ## ENFORCEABLE CHECKS
 
