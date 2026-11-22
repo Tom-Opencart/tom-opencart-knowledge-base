@@ -73,8 +73,8 @@ Source: `admin/controller/startup/permission.php` (read in full).
   `common/forgotten`, `common/reset`, `error/not_found`, `error/permission`.
 - :50 — `if (!in_array($route, $ignore) && !$this->user->hasPermission('access', $route)) return new Action('error/permission');`
 
-**Consequence — the method name is never part of the key.** `extension/module/vita_theme/install`
-resolves to the key `extension/module/vita_theme`; the `install` segment is discarded. Every method of a
+**Consequence — the method name is never part of the key.** `extension/module/my_module/install`
+resolves to the key `extension/module/my_module`; the `install` segment is discarded. Every method of a
 controller shares ONE permission row, so a route-level check can never distinguish a read method from a
 destructive one. A single unprotected write method in a controller is therefore reachable by anyone who
 may merely open that controller's page.

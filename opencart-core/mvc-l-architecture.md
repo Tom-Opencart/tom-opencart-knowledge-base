@@ -76,8 +76,8 @@ present. See `opencart-core/ocmod.md`.
 ```
 
 **Consequence — a library class name maps to a LOWER-CASE file path with backslashes turned into
-slashes.** The namespaced class `\vita\search\engine` resolves to
-`system/library/vita/search/engine.php`. This is why library and vendored file names are lower case, and
+slashes.** The namespaced class `\myshop\search\engine` resolves to
+`system/library/myshop/search/engine.php`. This is why library and vendored file names are lower case, and
 it is the mechanism behind namespaced helper libraries in a modification.
 
 ## Name resolution for models, views and language (`[verified]`, `system/engine/loader.php`)
@@ -113,15 +113,15 @@ This is the single most important mechanism to understand.
   `getNumberOfRequiredParameters() <= count($args)`, else Exception.
 
 **Consequence — trailing route segments beyond the deepest existing controller file become the METHOD
-name.** For `extension/module/vita_theme/search_suggest`, the file
-`controller/extension/module/vita_theme.php` exists, so the route is `extension/module/vita_theme` and
+name.** For `extension/module/my_module/search_suggest`, the file
+`controller/extension/module/my_module.php` exists, so the route is `extension/module/my_module` and
 the method is `search_suggest`. This is the mechanism behind every "method as an extra route segment"
 URL.
 
 **Consequence — the class name is derived by STRIPPING all non-alphanumeric characters**, including
-underscores and slashes. Route `extension/module/vita_theme` yields the string
-`Controllerextensionmodulevitatheme`. PHP class names are **case-insensitive**, so the declaration
-`class ControllerExtensionModuleVitaTheme` matches, and the usual CamelCase spelling is a convention
+underscores and slashes. Route `extension/module/my_module` yields the string
+`Controllerextensionmodulemymodule`. PHP class names are **case-insensitive**, so the declaration
+`class ControllerExtensionModuleMyModule` matches, and the usual CamelCase spelling is a convention
 rather than a requirement. Every verified controller in the baseline follows the CamelCase spelling.
 
 **Consequence — a controller method must not have required parameters.** It is called via
