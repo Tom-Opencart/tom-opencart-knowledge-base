@@ -54,8 +54,11 @@ A module is not one file — it is a coordinated set. Verified locations for the
 renders. Shipping the admin side without the catalog controller produces a module that appears installed
 and outputs nothing.
 
-**Consequence — the language file must exist for every installed language.** A missing language file
-surfaces as raw keys instead of labels, not as a fatal error, so it can ship unnoticed.
+**Consequence — ship the `en-gb` language file; add the others you support.** `Language::load()` first requires the
+file from the default directory (`private $default = 'en-gb'`) and then the file from the active language directory,
+merging both (`system/library/language.php`, `[verified]` on LiveStore `v3.0.4.5`). A missing file for the active
+language therefore falls back to the `en-gb` labels; raw keys appear only when neither file exists. Either way it is
+not a fatal error, so a missing file can ship unnoticed.
 
 ## The `install()` / `uninstall()` contract
 
@@ -149,7 +152,7 @@ remain.
 
 1. Every extension type used is one of the 14 known directories, or the permission layer is updated too.
 2. A module ships **both** the admin half and the catalog half (controller, plus template where it renders).
-3. A language file exists for every language directory the store uses.
+3. An `en-gb` language file exists (it is the fallback); add one for every other language directory the store uses.
 4. `install()` is idempotent: run twice, no error, no duplicates. Verify by inspection of every DDL/DML
    statement for an existence guard.
 5. `uninstall()` contains no `DROP TABLE` for merchant-data tables.
